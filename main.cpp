@@ -1,7 +1,6 @@
 #include "PacketReader.h"
 #include "AnalyzedPacketWriter.h"
 #include "PacketAnalyzer.h"
-#include <iostream>
 #include <string>
 
 int main() {
