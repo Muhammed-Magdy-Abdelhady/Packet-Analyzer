@@ -1,4 +1,3 @@
-
 # Packet Analyzer
 
 a packet analyzer application to analyze ethernet frames and break down the signal to it's own fields insted of a continuous stream of data.
@@ -25,3 +24,9 @@ and for the analyzer it is breaking down the string and mapping it to it's corre
 1. you can change the input packets file name from the #define PACKET_FILE_NAME in the PacketReader.cpp.
 2. you can change the output file name from the #define WRITE_FILE_NAME in the AnalyzedPacketWriter.cpp
 3. i broke down the signal and saved it all, despite knowing which parts of the signal i will need, so if we wanted the Preamble or the data of the packet we can easily retrieve it using the map mentioned in the description section.
+
+## Authors
+
+- [@Muhammed-Magdy-Abdelhady](https://github.com/Muhammed-Magdy-Abdelhady)
+
+- [@Ahmed Osama Ismail](https://github.com/ahmedosamaismail)
