@@ -3,8 +3,7 @@
 #include <fstream>
 #include <memory>
 #include <vector>
-#include <unordered_map>
-
+#include "Packet.h"
 
 class AnalyzedPacketWriter
 {
@@ -22,8 +21,8 @@ public:
 
     static std::shared_ptr<AnalyzedPacketWriter> getInstance(fileMode mode = fileMode::OVERWRITE);
 
-    void writePacket(const std::unordered_map<std::string, std::string>& packet);
-    void writePackets(const std::vector<std::unordered_map<std::string, std::string>>& packets);
+    void writePacket(const std::unique_ptr<Packet>& packet);
+    void writePackets(const std::vector<std::unique_ptr<Packet>>& packets);
 
 private:
     AnalyzedPacketWriter(fileMode mode = fileMode::OVERWRITE);
@@ -32,11 +31,8 @@ private:
 
     static std::shared_ptr<AnalyzedPacketWriter> instancePtr;
     std::ofstream writingFile;
-    const std::string eCEPRI_TYPE = "AEFE";
 
-    std::vector<std::string> preParedpacketToWrite;
     int packetCounter;
 
-    void preparePacketToWrite(const std::unordered_map<std::string, std::string>& packet);
     void writePacketDelimiter();
 };

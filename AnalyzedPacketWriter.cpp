@@ -35,10 +35,12 @@ AnalyzedPacketWriter::~AnalyzedPacketWriter()
     writingFile.close();
 }
 
-void AnalyzedPacketWriter::writePacket(const std::unordered_map<std::string, std::string>& packet)
+void AnalyzedPacketWriter::writePacket(const std::unique_ptr<Packet>& packet)
 {
-    preparePacketToWrite(packet);
+    auto preParedpacketToWrite = packet->breakDownPacket();
 
+
+    writingFile << "Packet # " << packetCounter << ":" << std::endl;
     for (const auto& mem : preParedpacketToWrite)
     {
         writingFile << mem << std::endl;
@@ -47,7 +49,7 @@ void AnalyzedPacketWriter::writePacket(const std::unordered_map<std::string, std
     writePacketDelimiter();
 }
 
-void AnalyzedPacketWriter::writePackets(const std::vector<std::unordered_map<std::string, std::string>>& packets)
+void AnalyzedPacketWriter::writePackets(const std::vector<std::unique_ptr<Packet>>& packets)
 {
     for (const auto& packet : packets)
     {
@@ -55,36 +57,9 @@ void AnalyzedPacketWriter::writePackets(const std::vector<std::unordered_map<std
     }
 }
 
-void AnalyzedPacketWriter::preparePacketToWrite(const std::unordered_map<std::string, std::string>& packet)
-{
-
-    preParedpacketToWrite.clear();
-    preParedpacketToWrite.push_back("Packet # " + std::to_string(packetCounter) +":");
-    preParedpacketToWrite.push_back(packet.at("Whole Packet"));
-    preParedpacketToWrite.push_back("CRC: " + packet.at("CRC"));
-
-    if (packet.at("Type") == eCEPRI_TYPE){
-        preParedpacketToWrite.push_back("Concatenation Indicator: " + packet.at("Concatenation Indicator"));
-    }
-
-    preParedpacketToWrite.push_back("Destination Address: " + packet.at("Destination Address"));
-    
-    if (packet.at("Type") == eCEPRI_TYPE){
-        preParedpacketToWrite.push_back("Message Type: " + packet.at("Message Type"));
-        preParedpacketToWrite.push_back("Payload Size: " + packet.at("Payload Size"));
-        preParedpacketToWrite.push_back("Protocol Version: " + packet.at("Protocol Version"));
-        preParedpacketToWrite.push_back("RTC ID: " + packet.at("RTC ID"));
-        preParedpacketToWrite.push_back("Sequence ID: " + packet.at("Sequence ID"));
-    }
-
-    preParedpacketToWrite.push_back("Source Address: " + packet.at("Source Address"));
-    preParedpacketToWrite.push_back("Type: " + packet.at("Type"));
-
-    ++packetCounter;
-}
-
 void AnalyzedPacketWriter::writePacketDelimiter()
 {
     writingFile << std::endl << std::string(PACKET_DELIMITER_NUMBER,'*') << std::endl << std::endl;
+    ++packetCounter;
 }
     

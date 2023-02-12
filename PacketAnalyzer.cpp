@@ -1,97 +1,55 @@
 #include "PacketAnalyzer.h"
-#include "PacketAnalyzerParams.h"
-#include <iostream>
-
-PacketAnalyzer::PacketAnalyzer(const std::string& packet):
-    m_packet(packet)
+#include "PacketParams.h"
+PacketAnalyzer::PacketAnalyzer()
 {
-    m_analyzedPacket["Whole Packet"] = m_packet;
 }
 
 PacketAnalyzer::~PacketAnalyzer()
 {
 }
 
-void PacketAnalyzer::AnalyzePacket()
+Packet::PacketProtocolType PacketAnalyzer::getPacketProtocolType(const std::string& packet)
 {
-    getPacketProtocolType();
-    getPacketDataLengthAndFCSPosition();
-    AnalyzePacketHeader();
-    AnalyzePacketBody();
-    AnalyzePacketFooter();
-}
-
-std::unordered_map<std::string, std::string> PacketAnalyzer::getAnalyzedPacket()
-{
-    return m_analyzedPacket;
-}
-
-void PacketAnalyzer::getPacketProtocolType()
-{
-    std::string packetType = m_packet.substr(PACKET_TYPE_POSITION, PACKET_TYPE_LENGTH);
+    std::string packetType = packet.substr(PACKET_TYPE_POSITION, PACKET_TYPE_LENGTH);
 
     if (packetType == eCEPRI_PACKET_TYPE_VALUE)
     {
-        m_PacketProtocolType = eCEPRI;
+        return Packet::eCEPRI;
     }
     else
     {
-        m_PacketProtocolType = NORMAL;
+        return Packet::NORMAL;
     }
 }
 
-void PacketAnalyzer::getPacketDataLengthAndFCSPosition()
+std::unique_ptr<Packet> PacketAnalyzer::AnalyzePacket(const std::string& packet)
 {
-    PACKET_DATA_LENGTH = m_packet.length() - PACKET_PREAMBLE_LENGTH - PACKET_DESTINATION_ADDRESS_LENGTH
-                                           - PACKET_SOURCE_ADDRESS_LENGTH - PACKET_TYPE_LENGTH - PACKET_FCS_LENGTH;
+    std::unique_ptr<Packet> m_packet;
+    auto packetProtocolType = getPacketProtocolType(packet);
 
-    PACKET_FCS_POSITION = PACKET_DATA_POSITION + PACKET_DATA_LENGTH;
-}
-
-void PacketAnalyzer::AnalyzePacketHeader()
-{
-    m_analyzedPacket["Preamble"] = m_packet.substr(PACKET_PREAMBLE_POSITION, PACKET_PREAMBLE_LENGTH);
-    m_analyzedPacket["Destination Address"] = m_packet.substr(PACKET_DESTINATION_ADDRESS_POSITION, PACKET_DESTINATION_ADDRESS_LENGTH);
-    m_analyzedPacket["Source Address"] = m_packet.substr(PACKET_SOURCE_ADDRESS_POSITION, PACKET_SOURCE_ADDRESS_LENGTH);
-    m_analyzedPacket["Type"] = m_packet.substr(PACKET_TYPE_POSITION, PACKET_TYPE_LENGTH);
-}
-
-void PacketAnalyzer::AnalyzePacketBody()
-{
-    if (m_PacketProtocolType == eCEPRI)
+    switch (packetProtocolType)
     {
-        AnalyzeeCEPRIPacketBody();
+    case Packet::eCEPRI:
+        m_packet = std::make_unique<eCEPRIPacket>(packet);
+        break;
+    case Packet::NORMAL:
+        m_packet = std::make_unique<rawPacket>(packet);
+        break;
+    default:
+        break;
     }
-    else
+
+    return m_packet;
+}
+
+std::vector<std::unique_ptr<Packet>> PacketAnalyzer::AnalyzePackets(const std::vector<std::string>& packets)
+{
+    std::vector<std::unique_ptr<Packet>> m_packets;
+
+    for (auto packet : packets)
     {
-        m_analyzedPacket["Data"] = m_packet.substr(PACKET_DATA_POSITION, PACKET_DATA_LENGTH);
+        m_packets.push_back(AnalyzePacket(packet));
     }
-}
 
-void PacketAnalyzer::AnalyzePacketFooter()
-{
-    m_analyzedPacket["CRC"] = m_packet.substr(PACKET_FCS_POSITION, PACKET_FCS_LENGTH);
-}
-
-void PacketAnalyzer::AnalyzeeCEPRIPacketBody()
-{
-    std::string eCEPRIPacketDataBody = m_packet.substr(PACKET_DATA_POSITION, PACKET_DATA_LENGTH);
-
-    m_analyzedPacket["Message Type"] = eCEPRIPacketDataBody.substr(eCEPRI_PACKET_MESSAGE_TYPE_POSITION, eCEPRI_PACKET_MESSAGE_TYPE_LENGTH);
-    m_analyzedPacket["Payload Size"] = eCEPRIPacketDataBody.substr(eCEPRI_PACKET_PAYLOAD_SIZE_POSITION, eCEPRI_PACKET_PAYLOAD_SIZE_LENGTH);
-    m_analyzedPacket["RTC ID"] = eCEPRIPacketDataBody.substr(eCEPRI_PACKET_RTC_ID_POSITION, eCEPRI_PACKET_RTC_ID_LENGTH);
-    m_analyzedPacket["Sequence ID"] = eCEPRIPacketDataBody.substr(eCEPRI_PACKET_SEQ_ID_POSITION, eCEPRI_PACKET_SEQ_ID_LENGTH);
-
-    char protocolVersion = m_hexToBinaryMap[eCEPRIPacketDataBody[eCEPRI_PACKET_PROTOCOL_VERSION_POSITION]];
-    m_analyzedPacket["Protocol Version"] = std::to_string(protocolVersion);
-
-    char ConcatenationIndicator = m_hexToBinaryMap[eCEPRIPacketDataBody[eCEPRI_PACKET_CONCATENATION_INDICATOR_POSITION]];
-    m_analyzedPacket["Concatenation Indicator"] = std::to_string(checkConcatenationIndicator(ConcatenationIndicator));
-
-
-}
-
-bool PacketAnalyzer::checkConcatenationIndicator(char ConcatenationIndicator)
-{
-    return ((ConcatenationIndicator >> eCEPRI_PACKET_CONCATENATION_INDICATOR_SHIFT_VALUE) & eCEPRI_PACKET_CONCATENATION_INDICATOR_MASK);
+    return m_packets;
 }

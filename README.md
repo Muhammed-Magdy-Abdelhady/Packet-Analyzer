@@ -17,7 +17,7 @@ used the singleton design pattern, cause there should be only one source for the
 
 the same thing is for the 3rd class which is the analyzed packet writer.
 
-and for the analyzer it is breaking down the string and mapping it to it's corresponding field so the packet writer use this map to prepare the analyzed signal to be written into a file.
+and there is an abstract class named Packet, and 2 children classes for the Packet types (raw, eCEPRI) the abstract class have virtual function that will be called -> breakdownPacket as each packet will be responsible of breaking down on it's own and at the packetAnalyzer class it's only responsibility is to analysis the type of the packet
 
 ## Notes
 
