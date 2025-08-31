@@ -1,4 +1,4 @@
-#include "SocketPacketReader.hpp"
+#include "FilePacketReader.hpp"
 #include "PacketReader.hpp"
 #include <memory>
 #include <iostream>
@@ -9,20 +9,21 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::cerr << "Usage: " << argv[0] << " <port>\n";
+        std::cerr << "Usage: " << argv[0] << " <file_path>\n";
         return 1;
     }
     std::cout << "Starting Packet Reader...\n";
-    int port = std::stoi(argv[1]);
-    std::cout << "Reading packets from port: " << port << "\n";
+    std::string filePath = argv[1];
+    std::cout << "Reading packets from file: " << filePath << "\n";
 
-    PacketReader packetReader(std::make_unique<SocketPacketReader>(port));
+    PacketReader packetReader(std::make_unique<FilePacketReader>(filePath));
 
     auto packets = packetReader.readPackets();
 
-    for (const auto &packet : packets)
-    {
-        std::cout << packet << "\n";
+    for (const auto& packet : packets) {
+        if (packet != nullptr) {
+            packet->analyze();
+        }
     }
 
     return 0;

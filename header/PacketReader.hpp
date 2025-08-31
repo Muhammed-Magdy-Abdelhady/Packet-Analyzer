@@ -1,8 +1,8 @@
 #pragma once
 
 #include "PacketReaderType.hpp"
+#include "Packet.hpp"
 #include <memory>
-
 
 class PacketReader
 {
@@ -11,5 +11,5 @@ class PacketReader
 public:
     PacketReader(std::unique_ptr<PacketReaderType> reader) : m_reader(std::move(reader)) {}
 
-    std::vector<std::string> readPackets();
+    std::vector<std::unique_ptr<Packet>> readPackets();
 };
