@@ -1,11 +1,10 @@
-#include "NumericalTypeConverter.h"
+#include "NumericalTypeConverter.hpp"
 
 #include <sstream>
 #include <bitset>
+#include <unordered_map>
 
-#define INT_SIZE 32
-
-const std::unordered_map<char,char> NumericalTypeConverter::m_hexToBinaryMap  = {
+const std::unordered_map<char,char> hexToBinaryMap  = {
         {'0', 0b0000},
         {'1', 0b0001},
         {'2', 0b0010},
@@ -22,7 +21,9 @@ const std::unordered_map<char,char> NumericalTypeConverter::m_hexToBinaryMap  = 
         {'D', 0b1101},
         {'E', 0b1110},
         {'F', 0b1111}
-}; 
+};
+
+const unsigned char INT_SIZE = sizeof(int) * 8;
 
 int NumericalTypeConverter::hexStringToInt(std::string hexString)
 {
@@ -45,14 +46,17 @@ int NumericalTypeConverter::octalStringToInt(std::string octalString)
 int NumericalTypeConverter::binaryStringToInt(std::string binaryString)
 {
     unsigned int value;
+
+
     std::bitset<INT_SIZE> bitset(binaryString);
+
     value = bitset.to_ulong();
     return static_cast<int>(value);
 }
 
 int NumericalTypeConverter::hexCharToInt(char hexChar)
 {
-    return m_hexToBinaryMap.at(hexChar);
+    return hexToBinaryMap.at(hexChar);
 }
 
 

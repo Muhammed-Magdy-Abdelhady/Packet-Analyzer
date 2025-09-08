@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
 
 class NumericalTypeConverter
 {
@@ -15,7 +14,4 @@ public:
     static std::string intToOctalString(int value);
     static std::string intToBinaryString(int value);
     static std::string charToString(char value);
-
-private:
-    static const std::unordered_map<char,char> m_hexToBinaryMap;
 };
