@@ -13,7 +13,7 @@ public:
     Packet(std::string packet);
     virtual ~Packet() = default;
 
-    virtual void analyze() override = 0;
+    virtual AnalysisResult analyze() const override = 0;
     virtual PacketProtocolType getPacketProtocolType() const = 0;
     std::string getPacketData() const { return m_packet; }
 

@@ -1,5 +1,6 @@
 #include "FilePacketReader.hpp"
 #include "PacketReader.hpp"
+#include "AnalyzableWriter.hpp"
 #include <memory>
 #include <iostream>
 
@@ -20,9 +21,20 @@ int main(int argc, char *argv[])
 
     auto packets = packetReader.readPackets();
 
-    for (const auto& packet : packets) {
+    // write to file stream, and create a new file if it doesn't exist
+    std::ofstream output("packets.txt", std::ios::out | std::ios::trunc);
+    if (!output) {
+        std::cerr << "Error opening output file.\n";
+        return 1;
+    }
+
+    for (std::size_t i = 0; i < packets.size(); ++i) {
+        const auto& packet = packets[i];
         if (packet != nullptr) {
-            packet->analyze();
+            output << "Packet # " << i << ":\n";
+            output << packet->getPacketData() << "\n";
+            AnalyzableWriter::writeAnalyzable(output, *packet);
+            output << "\n" << std::string(230, '*') << "\n\n";
         }
     }
 
